@@ -1,0 +1,36 @@
+version: '3.9'
+services:
+  backend:
+    build: .
+
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+      - redis
+
+  worker:
+    build: .
+    command: npm run worker
+    depends_on:
+      - redis
+
+  postgres:
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: password
+
+  redis:
+    image: redis
+
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - ./prometheus.yml:etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3001/3000"
