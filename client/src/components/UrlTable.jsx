@@ -4,8 +4,18 @@ import toast from 'react-hot-toast';
 import { Copy, Trash2, BarChart3, Check, ExternalLink } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-function UrlTable({ urls, onDelete }) {
+function UrlTable({ urls, onDelete, onRefreshClicks }) {
   const [copiedId, setCopiedId] = useState(null);
+  const [refreshingId, setRefreshingId] = useState(null);
+
+  async function handleRefreshClicks(e, urlId){
+        e.stopPropagation();
+        if(refreshingId) return null;
+
+        setRefreshingId(urlId);
+        await onRefreshClicks(urlId);
+        setRefreshingId(null);
+  }
 
   function handleCopy(id, url) {
     copy(url);
@@ -40,6 +50,7 @@ function UrlTable({ urls, onDelete }) {
             <tr>
               <th>Original URL</th>
               <th>Short Link</th>
+              <th>Clicks</th>
               <th>Created</th>
               <th>Actions</th>
             </tr>
@@ -86,6 +97,38 @@ function UrlTable({ urls, onDelete }) {
                     </span>
                     <ExternalLink size={11} style={{ color: 'var(--text-muted)' }} />
                   </a>
+                </td>
+
+                {/* Clicks */}
+                <td
+                  onClick={(e) => handleRefreshClicks(e, url.id)}
+                  style={{ cursor: 'pointer' }}
+                  title="Click to refresh click count in real-time"
+                >
+                  <span
+                    className="badge badge-green"
+                    style={{
+                      fontWeight: 'bold',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      transition: 'all 0.2s ease',
+                    }}
+                  >
+                    {refreshingId === url.id ? (
+                      <span
+                        style={{
+                          width: '12px',
+                          height: '12px',
+                          border: '2px solid rgba(52, 211, 153, 0.3)',
+                          borderTop: '2px solid #34d399',
+                          borderRadius: '50%',
+                          animation: 'spin 0.7s linear infinite',
+                        }}
+                      />
+                    ) : null}
+                    {url._count?.clickEvents ?? 0} clicks
+                  </span>
                 </td>
 
                 {/* Date */}

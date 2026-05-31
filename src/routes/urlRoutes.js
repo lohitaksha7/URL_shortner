@@ -12,6 +12,7 @@ const {
     getUrls,
     deleteUrl,
     getStats,
+    getUrlClicks,
 } = require('../controllers/urlController');
 
 
@@ -38,5 +39,10 @@ router.get('/stats',
 );
 
 router.get('/:code', redirectUrl);
+
+router.get('/urls/:id/clicks',
+    authenticate,
+    getUrlClicks,
+);
 
 module.exports = router;

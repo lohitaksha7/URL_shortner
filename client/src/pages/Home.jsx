@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import toast from 'react-hot-toast';
-import { Zap, Shield, BarChart3, Link2, ArrowRight, Copy, Check, Globe } from 'lucide-react';
+import { Zap, Shield, BarChart3, Link2, ArrowRight, Copy, Check, Globe, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import api from '../services/api';
 import MainLayout from '../layouts/MainLayout';
@@ -226,13 +226,23 @@ function Home() {
                 {shortUrl}
               </a>
             </div>
-            <button
-              onClick={handleCopy}
-              className="btn-primary"
-              style={{ flexShrink: 0, padding: '10px 20px', fontSize: '14px' }}
-            >
-              {copied ? <><Check size={15} /> Copied!</> : <><Copy size={15} /> Copy</>}
-            </button>
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexShrink: 0 }}>
+              <button
+                onClick={handleCopy}
+                className="btn-primary"
+                style={{ padding: '10px 20px', fontSize: '14px' }}
+              >
+                {copied ? <><Check size={15} /> Copied!</> : <><Copy size={15} /> Copy</>}
+              </button>
+              <button
+                onClick={() => setShortUrl('')}
+                className="btn-ghost"
+                style={{ padding: '10px' }}
+                title="Dismiss"
+              >
+                <X size={16} />
+              </button>
+            </div>
           </div>
         )}
 

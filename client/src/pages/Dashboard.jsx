@@ -44,29 +44,38 @@ function Dashboard() {
     const [ loadingClicks, setLoadingClicks] = useState(false);
     const [ loadingActive, setLoadingActive ] = useState(false);
 
+    const [status, setStatus] = useState('all');
+    const [sortBy,setSortBy] = useState('recent');
+
   // ─── Fetch URLs from backend ─────────────────────────────────────────────────
-  async function fetchUrls(searchTerm = search, pageNum = page) {
+  async function fetchUrls(searchTerm = search, pageNum = page, statusVal = status, sortVal = sortBy) {
     try {
       // Backend returns { urls: [...], total, page, totalPages }
       const response = await api.get(
-        `/urls?search=${searchTerm}&page=${pageNum}&limit=${LIMIT}`
+        `/urls?search=${searchTerm}&page=${pageNum}&limit=${LIMIT}&status=${statusVal}&sortBy=${sortVal}`
       );
       setUrls(response.data.urls || []);
       setTotal(response.data.total || 0);
       setTotalPages(response.data.totalPages || 1);
     } catch (error) {
       toast.error('Failed to fetch URLs');
-      setUrls([]);
+//       setUrls([]);
     } finally {
       setLoading(false);
     }
   }
 
-  // Load on mount — fetch both the URL list and the stats
   useEffect(() => {
-    fetchUrls();
-    fetchStats();
-  }, []);
+        setPage(1);
+        fetchUrls(search, 1, status, sortBy);
+//         fetchStats();
+  }, [status,sortBy]);
+
+  // Load on mount — fetch both the URL list and the stats
+  useEffect(()=>{
+     fetchUrls();
+     fetchStats();
+  },[]);
 
   async function fetchStats() {
     try {
@@ -124,6 +133,7 @@ function Dashboard() {
       setNewUrl('');
       setPage(1);           // go back to page 1 so user sees new link
       fetchUrls(search, 1);
+      fetchStats();
       captchaRef.current?.reset();
     } catch (error) {
       captchaRef.current?.reset();
@@ -156,6 +166,7 @@ function Dashboard() {
       } else {
         fetchUrls(search, page);
       }
+      fetchStats();
     } catch {
       setUrls(previous);
       toast.error('Delete failed');
@@ -189,7 +200,7 @@ function Dashboard() {
                 ...prev,
                 totalClicks: res.data.totalClicks,
                 clicksThisWeek: res.data.clicksThisWeek,
-                clicksLastWeek: res.data.clicksThisWeek
+                clicksLastWeek: res.data.clicksLastWeek
             }));
         }catch(error){
             toast.error("Failed to update clicks.")
@@ -212,6 +223,24 @@ function Dashboard() {
             setLoadingActive(false);
         }
   }
+
+  async function refreshRowClicks(urlId){
+        try{
+            const response = await api.get(`/urls/${urlId}/clicks`);
+            const updatedCount = response.data.clickCount;
+            setUrls((prevUrls)=>
+                prevUrls.map((url)=>
+                    url.id === urlId
+                    ? { ...url, _count: {...url._count, clickEvents: updatedCount} }
+                    : url
+                )
+            );
+            toast.success("Clicks updated.")
+        }catch(error){
+            toast.error("Failed to update clicks.");
+        }
+  }
+
   return (
     <DashboardLayout>
       {/* ── Header ── */}
@@ -383,38 +412,105 @@ function Dashboard() {
         )}
       </div>
 
-      {/* ── Search ── */}
-      <form
-        onSubmit={handleSearch}
-        style={{ marginBottom: '20px', display: 'flex', gap: '10px', maxWidth: '520px' }}
+      {/* ── Search & Filter Controls ── */}
+      <div
+        style={{
+          marginBottom: '20px',
+          display: 'flex',
+          gap: '12px',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+        }}
       >
-        <div style={{ flex: 1, position: 'relative' }}>
-          <Search
-            size={16}
-            style={{
-              position: 'absolute', left: '14px', top: '50%',
-              transform: 'translateY(-50%)', color: 'var(--text-muted)', pointerEvents: 'none',
-            }}
-          />
-          <input
-            type="text"
-            placeholder="Search your links..."
-            className="input"
-            style={{ paddingLeft: '40px', height: '42px', fontSize: '14px' }}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleSearch(e); } }}
-          />
-        </div>
-        <button
-          type="submit"
-          className="btn-primary"
-          style={{ height: '42px', padding: '0 20px', fontSize: '14px', flexShrink: 0 }}
+        <form
+          onSubmit={handleSearch}
+          style={{ display: 'flex', gap: '8px', flex: '1 1 300px' }}
         >
-          <Search size={15} />
-          Search
-        </button>
-      </form>
+          <div style={{ flex: 1, position: 'relative' }}>
+            <Search
+              size={16}
+              style={{
+                position: 'absolute', left: '14px', top: '50%',
+                transform: 'translateY(-50%)', color: 'var(--text-muted)', pointerEvents: 'none',
+              }}
+            />
+            <input
+              type="text"
+              placeholder="Search your links..."
+              className="input"
+              style={{ paddingLeft: '40px', height: '42px', fontSize: '14px' }}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleSearch(e); } }}
+            />
+          </div>
+          <button
+            type="submit"
+            className="btn-primary"
+            style={{ height: '42px', padding: '0 18px', fontSize: '14px', flexShrink: 0 }}
+          >
+            <Search size={15} />
+            Search
+          </button>
+        </form>
+
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', flexShrink: 0 }}>
+          {/* Status Dropdown */}
+          <select
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
+            style={{
+              background: 'var(--bg-input)',
+              border: '1px solid var(--border)',
+              borderRadius: 'var(--radius-md)',
+              color: 'var(--text-primary)',
+              fontFamily: 'Inter, sans-serif',
+              fontSize: '14px',
+              fontWeight: 500,
+              padding: '0 14px',
+              height: '42px',
+              cursor: 'pointer',
+              outline: 'none',
+              minWidth: '120px',
+              transition: 'var(--transition)',
+            }}
+            onFocus={(e) => e.target.style.borderColor = 'var(--accent)'}
+            onBlur={(e) => e.target.style.borderColor = 'var(--border)'}
+          >
+            <option value="all">All Links</option>
+            <option value="active">Active</option>
+            <option value="expired">Expired</option>
+          </select>
+
+          {/* Sort By Dropdown */}
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            style={{
+              background: 'var(--bg-input)',
+              border: '1px solid var(--border)',
+              borderRadius: 'var(--radius-md)',
+              color: 'var(--text-primary)',
+              fontFamily: 'Inter, sans-serif',
+              fontSize: '14px',
+              fontWeight: 500,
+              padding: '0 14px',
+              height: '42px',
+              cursor: 'pointer',
+              outline: 'none',
+              minWidth: '140px',
+              transition: 'var(--transition)',
+            }}
+            onFocus={(e) => e.target.style.borderColor = 'var(--accent)'}
+            onBlur={(e) => e.target.style.borderColor = 'var(--border)'}
+          >
+            <option value="recent">Most Recent</option>
+            <option value="oldest">Oldest</option>
+            <option value="most_clicked">Most Clicked</option>
+            <option value="least_clicked">Least Clicked</option>
+          </select>
+        </div>
+      </div>
 
       {/* ── Table / Skeleton / Empty ── */}
       {loading ? (
@@ -423,7 +519,11 @@ function Dashboard() {
         <EmptyStateCustom />
       ) : (
         <>
-          <UrlTable urls={urls} onDelete={handleDelete} />
+          <UrlTable
+            urls={urls}
+            onDelete={handleDelete}
+            onRefreshClicks={refreshRowClicks}
+          />
 
           {/* ── Pagination ── */}
           <Pagination

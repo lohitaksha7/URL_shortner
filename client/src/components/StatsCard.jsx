@@ -5,6 +5,7 @@ function StatsCard({ title, value, icon: Icon, trend, color = 'purple', onClick,
   const numericValue = parseInt(value, 10);
   const isNumeric = !isNaN(numericValue);
 
+  const prevValueRef = useRef(0);
   const colorMap = {
     purple: { bg: 'rgba(124,58,237,0.15)', icon: '#a78bfa', border: 'rgba(124,58,237,0.25)' },
     blue:   { bg: 'rgba(59,130,246,0.15)', icon: '#60a5fa', border: 'rgba(59,130,246,0.25)' },
@@ -16,20 +17,38 @@ function StatsCard({ title, value, icon: Icon, trend, color = 'purple', onClick,
   // Count-up animation
   useEffect(() => {
     if (!isNumeric) return;
+
+    const startValue = prevValueRef.current;
+    const endValue = numericValue;
+
+    if(startValue === endValue){
+        setDisplayValue(endValue);
+        return ;
+    }
     const duration = 800;
     const steps = 40;
     const stepMs = duration / steps;
-    let current = 0;
-    const increment = numericValue / steps;
+
+    let current = startValue;
+    const diff = endValue - startValue;
+    const increment = diff / steps;
     const timer = setInterval(() => {
       current += increment;
-      if (current >= numericValue) {
-        setDisplayValue(numericValue);
-        clearInterval(timer);
-      } else {
-        setDisplayValue(Math.floor(current));
+
+      if(increment>0 && current>=endValue || increment<0 && current<=endValue){
+          setDisplayValue(endValue);
+          clearInterval(timer);
+      }else{
+            setDisplayValue(Math.floor(current));
       }
+//       if (current >= numericValue) {
+//         setDisplayValue(numericValue);
+//         clearInterval(timer);
+//       } else {
+//         setDisplayValue(Math.floor(current));
+//       }
     }, stepMs);
+    prevValueRef.current = endValue
     return () => clearInterval(timer);
   }, [numericValue, isNumeric]);
 

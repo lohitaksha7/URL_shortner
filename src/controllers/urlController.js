@@ -150,30 +150,50 @@ async function redirectUrl(req, res){
         const limit = Number(req.query.limit) || 10;
         const search = req.query.search || '';
         const skip = (page-1)*limit;
+        const status = req.query.status ||'all';
+        const sortBy = req.query.sortBy || 'recent';
+        const now =  new Date();
+
+        const whereClause = {
+            userId: req.user.userId,
+            originalUrl:{
+                contains: search,
+                mode: 'insensitive',
+            },
+        };
+        if(status === 'active'){
+            whereClause.OR = [
+                {expiresAt: null},
+                {expiresAt: {gt: now} }
+            ];
+        }else if(status === 'expired'){
+            whereClause.expiresAt = {lt: now};
+        }
+
+        // 2. Build Dynamic Sorting
+        let orderByClause = { createdAt: "desc" };
+        if (sortBy === 'oldest') {
+            orderByClause = { createdAt: "asc" };
+        } else if (sortBy === 'most_clicked') {
+            orderByClause = { clickEvents: { _count: "desc" } };
+        } else if (sortBy === 'least_clicked') {
+            orderByClause = { clickEvents: { _count: "asc" } };
+        }
 
         const urls = await prisma.url.findMany({
-            where:{
-                userId: req.user.userId,
-                originalUrl: {
-                    contains: search,
-                    mode: 'insensitive',
-                },
+            where: whereClause,
+            include: {
+                _count: {
+                    select: { clickEvents: true }
+                }
             },
-            orderBy:{
-                createdAt: "desc",
-            },
+            orderBy: orderByClause,
             skip,
             take: limit,
         });
 
         const total = await prisma.url.count({
-            where:{
-                userId: req.user.userId,
-                originalUrl:{
-                    contains: search,
-                    mode:'insensitive',
-                },
-            },
+            where: whereClause,
         });
         return res.json({
             urls,
@@ -182,6 +202,7 @@ async function redirectUrl(req, res){
             totalPages: Math.ceil(total/limit),
         });
     }catch(error){
+        console.error('[getUrls error]', error);
         return res.status(500).json({
             error: 'Internal Server Error.',
         });
@@ -267,11 +288,32 @@ async function getStats(req, res) {
     }
 }
 
+async function getUrlClicks(req,res){
+    try{
+        const { id } = req.params;
+        const count = await prisma.clickEvent.count({
+            where:{
+                urlId: Number(id),
+                url:{
+                    userId: req.user.userId,
+                }
+            }
+        });
+        return res.json({ id: Number(id), clickCount: count });
+    }catch(error){
+        console.error("[getUrlClicks error]: ", error);
+        return res.status(500).json({
+            error: "Internal Server Error."
+        });
+    }
+}
+
 module.exports = {
     shortenUrl,
     redirectUrl,
     getUrls,
     deleteUrl,
     getStats,
+    getUrlClicks,
 };
 
