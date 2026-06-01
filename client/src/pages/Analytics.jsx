@@ -11,6 +11,12 @@ import {
   CartesianGrid,
   Area,
   AreaChart,
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
+  BarChart,
+  Bar,
 } from 'recharts';
 import { ArrowLeft, MousePointerClick, Activity, CheckCircle2, Globe, Clock } from 'lucide-react';
 import DashboardLayout from '../layouts/DashboardLayout';
@@ -247,6 +253,122 @@ function Analytics() {
               </AreaChart>
             </ResponsiveContainer>
           )}
+        </div>
+      </div>
+
+      {/* Breakdowns Section */}
+      <div
+        className="animate-fade-in delay-250"
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+          gap: '20px',
+          marginBottom: '24px',
+        }}
+      >
+        {/* 1. Devices Donut Chart */}
+        <div className="card-static" style={{ padding: '24px', display: 'flex', flexDirection: 'column' }}>
+          <h3 style={{ fontSize: '15px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '16px' }}>
+            Devices
+          </h3>
+          <div style={{ height: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            {analytics.devices && analytics.devices.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={analytics.devices}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={50}
+                    outerRadius={75}
+                    paddingAngle={5}
+                    dataKey="value"
+                  >
+                    {analytics.devices.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={['#7c3aed', '#3b82f6', '#34d399', '#fb923c'][index % 4]} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{
+                      background: 'var(--bg-secondary)',
+                      border: '1px solid var(--border)',
+                      borderRadius: '8px',
+                      color: 'var(--text-primary)',
+                      fontSize: '12px',
+                    }}
+                  />
+                  <Legend verticalAlign="bottom" height={36} tick={{ fill: 'var(--text-secondary)', fontSize: 12 }} />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <p style={{ color: 'var(--text-muted)', fontSize: '13px' }}>No device data</p>
+            )}
+          </div>
+        </div>
+
+        {/* 2. Top Referrers Bar Chart */}
+        <div className="card-static" style={{ padding: '24px', display: 'flex', flexDirection: 'column' }}>
+          <h3 style={{ fontSize: '15px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '16px' }}>
+            Top Referrers
+          </h3>
+          <div style={{ height: '200px' }}>
+            {analytics.referrer && analytics.referrer.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={analytics.referrer} layout="vertical" margin={{ left: 10, right: 10, top: 5, bottom: 5 }}>
+                  <XAxis type="number" hide />
+                  <YAxis
+                    dataKey="name"
+                    type="category"
+                    stroke="var(--text-muted)"
+                    fontSize={12}
+                    width={110}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      background: 'var(--bg-secondary)',
+                      border: '1px solid var(--border)',
+                      borderRadius: '8px',
+                      color: 'var(--text-primary)',
+                      fontSize: '12px',
+                    }}
+                  />
+                  <Bar dataKey="clicks" fill="rgba(124, 58, 237, 0.8)" radius={[0, 4, 4, 0]} barSize={12} />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <p style={{ color: 'var(--text-muted)', fontSize: '13px', textAlign: 'center', marginTop: '80px' }}>No referral data</p>
+            )}
+          </div>
+        </div>
+
+        {/* 3. Browsers List with Progress Bars */}
+        <div className="card-static" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <h3 style={{ fontSize: '15px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0px' }}>
+            Top Browsers
+          </h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', overflowY: 'auto', maxHeight: '180px' }}>
+            {analytics.browsers && analytics.browsers.length > 0 ? (
+              analytics.browsers.slice(0, 4).map((b) => {
+                const total = analytics.browsers.reduce((sum, curr) => sum + curr.value, 0);
+                const pct = Math.round((b.value / (total || 1)) * 100);
+                return (
+                  <div key={b.name} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
+                      <span style={{ color: 'var(--text-secondary)', fontWeight: 500 }}>{b.name}</span>
+                      <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{b.value} clicks ({pct}%)</span>
+                    </div>
+                    <div style={{ width: '100%', height: '6px', background: 'rgba(255,255,255,0.06)', borderRadius: '3px', overflow: 'hidden' }}>
+                      <div style={{ width: `${pct}%`, height: '100%', background: 'linear-gradient(90deg, #7c3aed, #a78bfa)', borderRadius: '3px' }} />
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <p style={{ color: 'var(--text-muted)', fontSize: '13px' }}>No browser data</p>
+            )}
+          </div>
         </div>
       </div>
 
