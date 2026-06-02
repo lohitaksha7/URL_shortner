@@ -49,7 +49,9 @@ app.get(
 );
 
 app.use('/auth',authRoutes);
-app.use('/analyticsRoutes', analyticsRoutes)
+//app.use('/analyticsRoutes', analyticsRoutes)
+app.use('/analytics', analyticsRoutes)
+
 
 module.exports= app;
 

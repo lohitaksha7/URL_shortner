@@ -1,5 +1,4 @@
 const prisma = require('../db/prisma');
-//const encoded62 = require('../utils/base62')
 const crypto = require('crypto');
 const ALPHABET = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
@@ -57,7 +56,8 @@ async function createShortUrl(originalUrl, customAlias, expiresAt, userId){
     let attempts = 0;
     const maxAttempts = 3;
     while(attempts<maxAttempts){
-        const shortCode = generationNanoId(7);
+        const shortCode = generationNanoId(6);
+
         try{
             return await prisma.url.create({
                 data:{
@@ -66,6 +66,7 @@ async function createShortUrl(originalUrl, customAlias, expiresAt, userId){
                     expiresAt: expiresAt ? new Date(expiresAt) : null,
                     userId,
                 }
+
             });
         }catch(error){
             if(error.code === 'P2002' && error.meta?.target?.includes('shortCode')){

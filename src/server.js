@@ -1,5 +1,6 @@
 require('dotenv').config();
 require('./tracing');
+require('./queue/analyticsWorker');
 
 const app = require('./app')
 const PORT = process.env.PORT || 3000

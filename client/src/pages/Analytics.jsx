@@ -22,14 +22,16 @@ import { ArrowLeft, MousePointerClick, Activity, CheckCircle2, Globe, Clock } fr
 import DashboardLayout from '../layouts/DashboardLayout';
 import api from '../services/api';
 
-function Analytics() {
+function Analytics({ global }) {
   const { code } = useParams();
   const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(true);
 
   async function fetchAnalytics() {
     try {
-      const response = await api.get(`/analyticsRoutes/${code}`);
+        const endPoint = global? '/analytics/global' : `/analytics/${code}`;
+//       const response = await api.get(`/analytics/${code}`);
+        const response = await api.get(endPoint);
       setAnalytics(response.data);
     } catch (error) {
       toast.error('Failed to load analytics.');
@@ -67,7 +69,7 @@ function Analytics() {
   const chartData = analytics.recentClicks.map((click, index) => ({
     index: index + 1,
     clicks: index + 1,
-    time: new Date(click.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+    time: new Date(click.clickedAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
   }));
 
   return (
@@ -114,18 +116,38 @@ function Analytics() {
             Analytics
           </h1>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <code
+            <a
+              href={`http://localhost:3000/${code}`}
+              target="_blank"
+              rel="noopener noreferrer"
               style={{
-                fontSize: '13px',
-                color: 'var(--accent-light)',
-                background: 'rgba(124,58,237,0.12)',
-                padding: '3px 10px',
-                borderRadius: '6px',
-                border: '1px solid rgba(124,58,237,0.2)',
+                textDecoration: 'none',
+                transition: 'var(--transition)',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.firstChild.style.background = 'rgba(124,58,237,0.22)';
+                e.currentTarget.firstChild.style.borderColor = 'rgba(124,58,237,0.45)';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.firstChild.style.background = 'rgba(124,58,237,0.12)';
+                e.currentTarget.firstChild.style.borderColor = 'rgba(124,58,237,0.2)';
               }}
             >
-              /{code}
-            </code>
+              <code
+                style={{
+                  fontSize: '13px',
+                  color: 'var(--accent-light)',
+                  background: 'rgba(124,58,237,0.12)',
+                  padding: '3px 10px',
+                  borderRadius: '6px',
+                  border: '1px solid rgba(124,58,237,0.2)',
+                  cursor: 'pointer',
+                  transition: 'var(--transition)',
+                }}
+              >
+                /{code}
+              </code>
+            </a>
             <span className="badge badge-green">
               <span
                 style={{
@@ -239,6 +261,8 @@ function Analytics() {
                     fontSize: '13px',
                     boxShadow: 'var(--shadow-md)',
                   }}
+                  itemStyle={{ color: 'var(--text-primary)' }}
+                  labelStyle={{ color: 'var(--text-primary)' }}
                   cursor={{ stroke: 'rgba(124,58,237,0.3)', strokeWidth: 1 }}
                 />
                 <Area
@@ -296,6 +320,8 @@ function Analytics() {
                       color: 'var(--text-primary)',
                       fontSize: '12px',
                     }}
+                    itemStyle={{ color: 'var(--text-primary)' }}
+                    labelStyle={{ color: 'var(--text-primary)' }}
                   />
                   <Legend verticalAlign="bottom" height={36} tick={{ fill: 'var(--text-secondary)', fontSize: 12 }} />
                 </PieChart>
@@ -333,6 +359,8 @@ function Analytics() {
                       color: 'var(--text-primary)',
                       fontSize: '12px',
                     }}
+                    itemStyle={{ color: 'var(--text-primary)' }}
+                    labelStyle={{ color: 'var(--text-primary)' }}
                   />
                   <Bar dataKey="clicks" fill="rgba(124, 58, 237, 0.8)" radius={[0, 4, 4, 0]} barSize={12} />
                 </BarChart>
@@ -463,7 +491,7 @@ function Analytics() {
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px' }}>
                         <Clock size={13} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
-                        {new Date(click.createdAt).toLocaleString('en-US', {
+                        {new Date(click.clickedAt).toLocaleString('en-US', {
                           month: 'short',
                           day: 'numeric',
                           hour: '2-digit',

@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 
 const navItems = [
   { icon: LayoutDashboard, label: 'Dashboard', to: '/dashboard' },
-  { icon: BarChart3,       label: 'Analytics',  to: '/analytics/demo' },
+  { icon: BarChart3,       label: 'Analytics',  to: '/analytics/global' },
 ];
 
 function SidebarContent({ setIsOpen }) {

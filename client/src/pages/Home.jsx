@@ -57,8 +57,8 @@ function Home() {
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          justifyContent: 'center',
-          padding: '80px 24px',
+          justifyContent: 'flex-start',
+          padding: '48px 24px 80px 24px',
           textAlign: 'center',
           position: 'relative',
         }}

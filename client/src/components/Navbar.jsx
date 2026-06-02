@@ -60,13 +60,21 @@ function Navbar() {
         {/* Theme Toggle */}
         <button
           onClick={toggleTheme}
-          className="btn-ghost"
+          className="btn-secondary"
           title="Toggle theme"
-          style={{ borderRadius: 'var(--radius-sm)', padding: '8px' }}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '10px',
+            width: '38px',
+            height: '38px',
+            borderRadius: 'var(--radius-md)',
+          }}
         >
           {theme === 'light'
-            ? <Moon size={18} />
-            : <Sun size={18} style={{ color: '#fbbf24' }} />
+            ? <Moon size={16} />
+            : <Sun size={16} style={{ color: '#fbbf24' }} />
           }
         </button>
 
@@ -74,15 +82,13 @@ function Navbar() {
           <>
             <Link
               to="/dashboard"
+              className="btn-secondary"
               style={{
-                padding: '8px 16px',
-                borderRadius: 'var(--radius-md)',
-                fontWeight: 500,
-                fontSize: '14px',
                 textDecoration: 'none',
-                color: location.pathname === '/dashboard' ? 'var(--accent-light)' : 'var(--text-secondary)',
-                background: location.pathname === '/dashboard' ? 'rgba(124,58,237,0.12)' : 'transparent',
-                transition: 'var(--transition)',
+                padding: '10px 18px',
+                fontSize: '14px',
+                fontWeight: 500,
+                color: 'var(--text-primary)',
               }}
             >
               Dashboard

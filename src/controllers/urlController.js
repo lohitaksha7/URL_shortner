@@ -50,7 +50,7 @@ async function shortenUrl(req,res){
 //            }
 //        }
         const result = await createShortUrl(newUrl, CustomAlias, expiresAt, userId);
-
+//        console.log(req.host);
         return res.status(201).json({
             shortUrl: `${process.env.BASE_URL}/${result.shortCode}`,
             shortCode: result.shortCode,
@@ -115,7 +115,7 @@ async function redirectUrl(req, res){
 //            console.log(req.headers['user-agent']);
 //            console.log(req.headers.referrer || null);
 //            console.log(req.url);
-            console.log(req.host);
+//            console.log(req.host);
             analyticsQueue.add(
                 'trackClick',
                 {
@@ -133,7 +133,7 @@ async function redirectUrl(req, res){
                 }
             );
 
-            console.log("analyticsQueue passed.");
+//            console.log("analyticsQueue passed.");
 
             return res.redirect(302, urlEntry.originalUrl);
         }catch(error){
@@ -246,7 +246,6 @@ async function getStats(req, res) {
         const weekAgo  = new Date(now - 7  * 24 * 60 * 60 * 1000);
         const twoWeeksAgo = new Date(now - 14 * 24 * 60 * 60 * 1000);
 
-        // ── Links ────────────────────────────────────────────────
         const [totalLinks, linksThisWeek, linksLastWeek, activeLinks] = await Promise.all([
             prisma.url.count({ where: { userId } }),
             prisma.url.count({ where: { userId, createdAt: { gte: weekAgo } } }),
@@ -259,8 +258,7 @@ async function getStats(req, res) {
             }),
         ]);
 
-        // ── Clicks (across all urls owned by this user) ───────────
-        // Get all shortCodes that belong to this user
+
         const userUrls = await prisma.url.findMany({
             where: { userId },
             select: { shortCode: true },

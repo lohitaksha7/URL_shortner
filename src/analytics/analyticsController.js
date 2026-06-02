@@ -19,10 +19,10 @@ async function getAnalytics(req,res){
             where:{
                 shortCode: code,
             },
-            orderBy: {clickedAt: 'desc'}
+            orderBy: {clickedAt: 'asc'}
         });
 
-        const devices = { Mobile: 0, Tablet: 0, PC: 0};
+        const devices = { Mobile: 0, Tablet: 0, Desktop: 0};
         const browsers = {};
         const os = {};
 
@@ -97,7 +97,7 @@ async function getGlobalAnalytics(req,res){
             _count: {id:true},
             orderBy: { _count: {id: 'desc'}}
         });
-        const topLink = await prisma.clickEvent.groupBy({
+        const topLinkGroup = await prisma.clickEvent.groupBy({
             by: ['urlId'],
             where: {urlId: {in: userUrlsIds}},
             _count: { id:true },
@@ -105,12 +105,30 @@ async function getGlobalAnalytics(req,res){
             take: 1,
         });
 
+        let starLinkDetails = null;
+        if(topLinkGroup.length>0){
+            starLinkDetails = await prisma.url.findUnique({
+                where: {
+                    id: topLinkGroup[0].urlId
+                },
+                select: {shortCode: true, originalUrl: true},
+            });
+        }
+
         return res.json({
             totalLinks: userUrls.length,
             totalClicks,
-            globalReferrers,
-            topLinkId: topLink[0]?.urlId || null,
-            topLinkClickCount: topLink[0]?._count || 0,
+            globalReferrers: globalReferrers.map(r =>({
+                name: r.referrer || 'Direct',
+                clicks: r._count.id
+            })),
+            starLink: starLinkDetails ? {
+                shortCode: starLinkDetails.shortCode,
+                originalUrl: starLinkDetails.originalUrl,
+                clicks: topLinkGroup[0]._count.id
+            }: null,
+//            topLinkId: topLink[0]?.urlId || null,
+//            topLinkClickCount: topLink[0]?._count || 0,
         });
 
     }catch(error){
@@ -123,4 +141,5 @@ async function getGlobalAnalytics(req,res){
 
 module.exports = {
     getAnalytics,
+    getGlobalAnalytics,
 }

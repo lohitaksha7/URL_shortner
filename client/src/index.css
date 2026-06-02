@@ -480,3 +480,51 @@ body {
 .copy-btn-check {
   color: #34d399 !important;
 }
+
+/* ============================================
+   FLOATING THEME TOGGLE BUTTON
+   ============================================ */
+.theme-toggle-floating {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 9999;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+              background-color 0.25s ease,
+              border-color 0.25s ease,
+              box-shadow 0.2s ease;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: var(--text-primary);
+}
+
+.theme-toggle-floating:hover {
+  transform: translateY(-2px) scale(1.08);
+  background: var(--bg-card-hover);
+  border-color: var(--border-accent);
+  box-shadow: var(--shadow-glow);
+}
+
+.theme-toggle-floating:active {
+  transform: translateY(0) scale(0.96);
+}
+
+@media (max-width: 768px) {
+  .theme-toggle-floating {
+    bottom: 20px;
+    right: 20px;
+    width: 44px;
+    height: 44px;
+  }
+}
+
