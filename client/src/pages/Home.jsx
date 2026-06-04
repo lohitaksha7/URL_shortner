@@ -328,36 +328,7 @@ function Home() {
         </div>
       </section>
 
-      {/* ======= CTA ======= */}
-      <section
-        style={{
-          padding: '80px 24px',
-          textAlign: 'center',
-          borderTop: '1px solid var(--border)',
-        }}
-      >
-        <h2
-          style={{
-            fontSize: 'clamp(1.6rem, 3vw, 2.4rem)',
-            fontWeight: 800,
-            letterSpacing: '-0.5px',
-            marginBottom: '16px',
-          }}
-        >
-          Ready to shorten smarter?
-        </h2>
-        <p style={{ color: 'var(--text-secondary)', marginBottom: '32px', fontSize: '16px' }}>
-          Create a free account and start shortening in seconds.
-        </p>
-        <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
-          <Link to="/register" className="btn-primary" style={{ textDecoration: 'none', padding: '14px 32px', fontSize: '16px' }}>
-            Get Started Free <ArrowRight size={16} />
-          </Link>
-          <Link to="/login" className="btn-secondary" style={{ textDecoration: 'none', padding: '14px 28px', fontSize: '16px' }}>
-            Sign In
-          </Link>
-        </div>
-      </section>
+
     </MainLayout>
   );
 }

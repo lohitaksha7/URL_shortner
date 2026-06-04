@@ -18,7 +18,23 @@ async function cacheUrl(
     );
 }
 
+async function getCachedQR(cacheKey){
+    const data = await connection.get(cacheKey);
+    if(!data) return null;
+    if(cacheKey.endsWith(':svg')) return data;
+    return Buffer.from(data, 'base64');
+}
+
+async function cacheQR(cacheKey, imageData, ttlSeconds = 86400){
+    const valueToStore = Buffer.isBuffer(imageData)
+                         ? imageData.toString('Base64')
+                         : imageData;
+    await connection.set(cacheKey, valueToStore, 'Ex', ttlSeconds);
+}
+
 module.exports = {
     getCachedUrl,
     cacheUrl,
+    getCachedQR,
+    cacheQR,
 }

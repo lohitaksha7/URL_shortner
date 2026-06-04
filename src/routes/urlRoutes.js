@@ -15,6 +15,9 @@ const {
     getUrlClicks,
 } = require('../controllers/urlController');
 
+const { getQRCode, getBarcode } = require('../controllers/qrController')
+
+
 
 router.post('/shorten',
     authenticate,
@@ -38,11 +41,22 @@ router.get('/stats',
     getStats,
 );
 
+router.get(
+    '/urls/:code/qr',
+    getQRCode,
+);
+
+router.get(
+    '/urls/:code/barcode',
+    getBarcode,
+);
+
 router.get('/:code', redirectUrl);
 
 router.get('/urls/:id/clicks',
     authenticate,
     getUrlClicks,
 );
+
 
 module.exports = router;
