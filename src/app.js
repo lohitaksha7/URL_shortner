@@ -8,6 +8,8 @@ const analyticsRoutes = require('./analytics/analyticsRoutes');
 const {
     httpRequestDuration,
 } = require('./monitoring/metrics');
+//import 'client' from './monitoring/metrics.js'
+const { client } = require('./monitoring/metrics.js');
 
 
 const app = express();
@@ -32,7 +34,6 @@ app.use((req,res,next)=>{
     next();
 });
 
-app.use('/', urlRoutes);
 
 app.get(
     '/metrics',
@@ -47,6 +48,9 @@ app.get(
         );
     }
 );
+
+app.use('/', urlRoutes);
+
 
 app.use('/auth',authRoutes);
 //app.use('/analyticsRoutes', analyticsRoutes)

@@ -29,9 +29,9 @@ function Analytics({ global }) {
 
   async function fetchAnalytics() {
     try {
-        const endPoint = global? '/analytics/global' : `/analytics/${code}`;
-//       const response = await api.get(`/analytics/${code}`);
-        const response = await api.get(endPoint);
+//         const endPoint = global? '/analytics/global' : `/analytics/${code}`;
+      const response = await api.get(`/analytics/${code}`);
+//         const response = await api.get(endPoint);
       setAnalytics(response.data);
     } catch (error) {
       toast.error('Failed to load analytics.');

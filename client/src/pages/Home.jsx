@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import toast from 'react-hot-toast';
-import { Zap, Shield, BarChart3, Link2, ArrowRight, Copy, Check, Globe, X } from 'lucide-react';
+import { Zap, Shield, BarChart3, Link2, ArrowRight, Copy, Check, Globe, X, QrCode, AlignJustify } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import api from '../services/api';
 import MainLayout from '../layouts/MainLayout';
@@ -12,6 +12,11 @@ function Home() {
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
   const captchaRef = useRef(null);
+  const [qrModal, setQrModal] = useState(null);
+
+  // Extract just the short code from the full short URL string
+  // e.g. "http://localhost:3000/Gf8K2z" → "Gf8K2z"
+  const shortCode = shortUrl ? shortUrl.split('/').pop() : null;
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -45,6 +50,35 @@ function Home() {
     toast.success('Copied!');
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  }
+
+  async function previewAndDownload(type = 'qr') {
+    try {
+      const token = localStorage.getItem('token');
+      const res   = await fetch(`http://localhost:3000/urls/${shortCode}/${type}?format=png`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error('Failed');
+      const blob   = await res.blob();
+      const imgSrc = URL.createObjectURL(blob);
+      setQrModal({ shortCode, type, imgSrc });
+    } catch {
+      toast.error('Failed to load preview');
+    }
+  }
+
+  function closeModal() {
+    if (qrModal?.imgSrc) URL.revokeObjectURL(qrModal.imgSrc);
+    setQrModal(null);
+  }
+
+  function downloadFromModal() {
+    if (!qrModal) return;
+    const link    = document.createElement('a');
+    link.href     = qrModal.imgSrc;
+    link.download = `${qrModal.type}-${qrModal.shortCode}.png`;
+    link.click();
+    closeModal();
   }
 
   return (
@@ -234,6 +268,27 @@ function Home() {
               >
                 {copied ? <><Check size={15} /> Copied!</> : <><Copy size={15} /> Copy</>}
               </button>
+
+              {/* QR Code */}
+              <button
+                onClick={() => previewAndDownload('qr')}
+                className="btn-secondary"
+                title="Preview & Download QR Code"
+                style={{ padding: '10px 14px' }}
+              >
+                <QrCode size={16} />
+              </button>
+
+              {/* Barcode */}
+              <button
+                onClick={() => previewAndDownload('barcode')}
+                className="btn-secondary"
+                title="Preview & Download Barcode"
+                style={{ padding: '10px 14px' }}
+              >
+                <AlignJustify size={16} />
+              </button>
+
               <button
                 onClick={() => setShortUrl('')}
                 className="btn-ghost"
@@ -329,6 +384,74 @@ function Home() {
       </section>
 
 
+
+      {/* ── QR / Barcode Preview Modal ── */}
+      {qrModal && (
+        <div
+          onClick={closeModal}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.7)',
+            backdropFilter: 'blur(6px)',
+            WebkitBackdropFilter: 'blur(6px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+            animation: 'fade-in-fast 0.2s ease both',
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="card-static"
+            style={{
+              padding: '32px',
+              borderRadius: 'var(--radius-xl)',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '20px',
+              minWidth: '300px',
+              border: '1px solid var(--border-accent)',
+              boxShadow: 'var(--shadow-glow-strong)',
+              animation: 'slide-up 0.3s ease both',
+            }}
+          >
+            <p style={{ fontWeight: 700, fontSize: '16px' }}>
+              {qrModal.type === 'qr' ? '🔳 QR Code' : '📊 Barcode'} —{' '}
+              <span style={{ color: 'var(--accent-light)', fontFamily: 'monospace' }}>
+                {qrModal.shortCode}
+              </span>
+            </p>
+
+            <div style={{ padding: '16px', background: '#fff', borderRadius: 'var(--radius-md)' }}>
+              <img
+                src={qrModal.imgSrc}
+                alt={`${qrModal.type} for ${qrModal.shortCode}`}
+                style={{ display: 'block', width: '220px', height: 'auto' }}
+              />
+            </div>
+
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button
+                onClick={downloadFromModal}
+                className="btn-primary"
+                style={{ padding: '10px 24px', fontSize: '14px' }}
+              >
+                ⬇ Download PNG
+              </button>
+              <button
+                onClick={closeModal}
+                className="btn-secondary"
+                style={{ padding: '10px 18px', fontSize: '14px' }}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </MainLayout>
   );
 }

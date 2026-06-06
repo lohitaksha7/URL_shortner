@@ -105,7 +105,7 @@ async function redirectUrl(req, res){
                 console.log("Cache Hit.");
             }
 
-            if(urlEntry.expiresAt && new Date() > new Date(expiresAt)){
+            if(urlEntry.expiresAt && new Date() > new Date(urlEntry.expiresAt)){
                 return res.status(410).json({
                     error: 'Short url expired!',
                 });
@@ -123,6 +123,7 @@ async function redirectUrl(req, res){
                     ipAddress: req.ip,
                     userAgent: req.headers['user-agent'],
                     referrer: req.headers.referrer || null,
+                    urlId: urlEntry.id,
                 },
                 {
                     attempts: 3,

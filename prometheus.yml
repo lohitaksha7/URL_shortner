@@ -1,8 +1,18 @@
+#global:
+#  scrape_interval: 5s
+#
+#scrape_configs:
+#  - job_name: 'backend'
+#    static_configs:
+#      - targets:
+#        - 'backend'
+
+# prometheus.yml  (place next to docker-compose.yml)
 global:
-  scrape_interval: 5s
+  scrape_interval: 15s
 
 scrape_configs:
-  - job_name: 'backend'
+  - job_name: 'url-shortener'
     static_configs:
-      - targets:
-        - 'backend'
+      - targets: ['host.docker.internal:3000']
+      # host.docker.internal → reaches your local npm backend from inside Docker

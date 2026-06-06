@@ -27,9 +27,9 @@ async function getCachedQR(cacheKey){
 
 async function cacheQR(cacheKey, imageData, ttlSeconds = 86400){
     const valueToStore = Buffer.isBuffer(imageData)
-                         ? imageData.toString('Base64')
+                         ? imageData.toString('base64')
                          : imageData;
-    await connection.set(cacheKey, valueToStore, 'Ex', ttlSeconds);
+    await connection.set(cacheKey, valueToStore, 'EX', ttlSeconds);
 }
 
 module.exports = {

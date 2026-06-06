@@ -14,7 +14,7 @@ async function getQRCode(req,res){
         const cacheKey = `qr:${code}:${size}:${format}:${color}:${bg}`;
 
         const cached = await getCachedQR(cacheKey);
-        if(cached) return sendImage(res, cached, format, download);
+        if(cached) return sendImage(res, cached, format, code, download);
 
         const urlEntry = await prisma.url.findUnique({
             where:{ shortCode: code}

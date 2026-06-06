@@ -19,7 +19,7 @@ async function getAnalytics(req,res){
             where:{
                 shortCode: code,
             },
-            orderBy: {clickedAt: 'asc'}
+            orderBy: {clickedAt: 'desc'}
         });
 
         const devices = { Mobile: 0, Tablet: 0, Desktop: 0};
@@ -33,7 +33,7 @@ async function getAnalytics(req,res){
             const osName = parser.getOS().name || 'Unknown';
 
             const typeKey = deviceType.charAt(0).toUpperCase() + deviceType.slice(1);
-            devices[typeKey] = (devices[deviceType] || 0) + 1;
+            devices[typeKey] = (devices[typeKey] || 0) + 1;
             browsers[browserName] = (browsers[browserName] || 0) + 1;
             os[osName] = (os[osName] || 0) + 1;
         });

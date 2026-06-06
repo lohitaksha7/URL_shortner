@@ -23,16 +23,7 @@ async function createShortUrl(originalUrl, customAlias, expiresAt, userId){
             throw new Error('Custom alias already exists!');
         }
 
-        const existingUrl = await prisma.url.findFirst({
-               where: {
-                    originalUrl,
-                    userId,
-               },
-        });
 
-        if(existingUrl && !customAlias){
-             return existingUrl;
-        }
         return prisma.url.create({
            data: {
                 originalUrl,
@@ -42,16 +33,16 @@ async function createShortUrl(originalUrl, customAlias, expiresAt, userId){
            },
         });
     }
-    const existing = await prisma.url.findFirst({
-        where:{
-            originalUrl,
-            userId,
-        }
-    });
-    if(existing){
-        console.log(existing);
-        return existing;
-    }
+//    const existing = await prisma.url.findFirst({
+//        where:{
+//            originalUrl,
+//            userId,
+//        }
+//    });
+//    if(existing){
+//        console.log(existing);
+//        return existing;
+//    }
 
     let attempts = 0;
     const maxAttempts = 3;
