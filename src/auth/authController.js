@@ -1,6 +1,7 @@
 const {
     registerUser,
-    loginUser
+    loginUser,
+    loginGoogleUser,
 } = require('./authService');
 
 async function register(req,res){
@@ -35,7 +36,20 @@ async function login(req,res){
     }
 }
 
+async function googleAuth(req,res){
+    try{
+        const { token } = req.body;
+        const result = await loginGoogleUser(token);
+        return res.json(result);
+    }catch(error){
+        return res.status(401).json({
+            error: error.message,
+        });
+    }
+}
+
 module.exports = {
     register,
     login,
+    googleAuth,
 };

@@ -4,6 +4,8 @@ import toast from 'react-hot-toast';
 import { Mail, Lock, ArrowRight, Link2, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import Captcha from '../components/Captcha';
+import { GoogleLogin } from '@react-oauth/google';
+
 
 function Login() {
   const [email, setEmail] = useState('');
@@ -11,8 +13,21 @@ function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, loginWithGoogle } = useAuth();
   const captchaRef = useRef(null);
+
+  async function handleGoogleSuccess(credentialResponse) {
+    setLoading(true);
+    try {
+      await loginWithGoogle(credentialResponse.credential);
+      toast.success('Welcome back!');
+      navigate('/dashboard');
+    } catch (error) {
+      toast.error(error?.response?.data?.error || 'Google Login failed.');
+    } finally {
+      setLoading(false);
+    }
+  }
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -36,6 +51,19 @@ function Login() {
     } finally {
       setLoading(false);
     }
+  }
+
+  async function handleGoogleSuccess(credentialResponse){
+      setLoading(true);
+      try{
+          await loginWithGoogle(credentialResponse.credential);
+          toast.success("Welcome");
+          navigate('/dashboard');
+      }catch(error){
+          toast.error('Google Sign-In failed');
+      }finally{
+          setLoading(false);
+      }
   }
 
   return (
@@ -302,6 +330,21 @@ function Login() {
               )}
             </button>
           </form>
+
+          {/* Divider */}
+          <div style={{ display: 'flex', alignItems: 'center', margin: '20px 0', color: 'var(--text-muted)' }}>
+            <hr style={{ flex: 1, border: 'none', borderTop: '1px solid var(--border)' }} />
+            <span style={{ padding: '0 10px', fontSize: '14px' }}>or</span>
+            <hr style={{ flex: 1, border: 'none', borderTop: '1px solid var(--border)' }} />
+          </div>
+
+          {/* Google Button */}
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={() => toast.error('Google Sign-In failed')}
+            />
+          </div>
         </div>
       </div>
     </div>

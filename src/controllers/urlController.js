@@ -260,17 +260,11 @@ async function getStats(req, res) {
         ]);
 
 
-        const userUrls = await prisma.url.findMany({
-            where: { userId },
-            select: { shortCode: true },
-        });
-        const codes = userUrls.map((u) => u.shortCode);
-
-        const [totalClicks, clicksThisWeek, clicksLastWeek] = await Promise.all([
-            prisma.clickEvent.count({ where: { shortCode: { in: codes } } }),
-            prisma.clickEvent.count({ where: { shortCode: { in: codes }, clickedAt: { gte: weekAgo } } }),
-            prisma.clickEvent.count({ where: { shortCode: { in: codes }, clickedAt: { gte: twoWeeksAgo, lt: weekAgo } } }),
-        ]);
+          const [ totalClicks, clicksThisWeek, clicksLastWeek ] = await Promise.all([
+                prisma.clickEvent.count({ where: { url: { userId }}}),
+                prisma.clickEvent.count({ where: { url: { userId }, clickedAt: { gte: weekAgo }}}),
+                prisma.clickEvent.count({ where: {url: {userId }, clickedAt: { gte: twoWeeksAgo, lt: weekAgo}}}),
+          ]);
 
         return res.json({
             totalLinks,

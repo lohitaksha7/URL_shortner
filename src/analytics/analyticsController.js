@@ -15,11 +15,13 @@ async function getAnalytics(req,res){
                 error: "Url not found."
             });
         }
+        const totalClicksCount = await prisma.clickEvent.count({
+            where: {shortCode: code},
+        });
         const clickEvents = await prisma.clickEvent.findMany({
-            where:{
-                shortCode: code,
-            },
-            orderBy: {clickedAt: 'desc'}
+            where:{ shortCode: code },
+            orderBy: {clickedAt: 'desc'},
+            take: 5000,
         });
 
         const devices = { Mobile: 0, Tablet: 0, Desktop: 0};
@@ -54,7 +56,8 @@ async function getAnalytics(req,res){
         });
 
         return res.json({
-            totalClicks: clickEvents.length,
+//            totalClicks: clickEvents.length,
+            totalClicks: totalClicksCount,
             recentClicks: clickEvents.slice(0,10),
 
             devices: Object.entries(devices).map(([name,value])=>({name,value})),
@@ -75,33 +78,27 @@ async function getAnalytics(req,res){
 async function getGlobalAnalytics(req,res){
     try{
         const userId = req.user.userId;
-        const userUrls = await prisma.url.findMany({
-            where:{
-                userId
-            },
-            select:{ shortCode: true, id: true},
+
+        const totalLinks = await prisma.url.count({
+            where:{ userId }
         });
 
-        const userCodes = userUrls.map(u => u.shortCode);
-        const userUrlsIds = userUrls.map(u => u.id);
-
         const totalClicks = await prisma.clickEvent.count({
-            where: {
-                shortCode: { in: userCodes}
-            },
+            where: { url: { userId } }
         });
 
         const globalReferrers = await prisma.clickEvent.groupBy({
-            by: ['referrer'],
-            where: {shortCode: {in: userCodes}},
-            _count: {id:true},
-            orderBy: { _count: {id: 'desc'}}
+            by: [ 'referrer' ],
+            where: { url: { userId }},
+            _count: { id: true },
+            orderBy: { _count: { id: 'desc' }}
         });
+
         const topLinkGroup = await prisma.clickEvent.groupBy({
-            by: ['urlId'],
-            where: {urlId: {in: userUrlsIds}},
-            _count: { id:true },
-            orderBy: { _count: {id:'desc'} },
+            by: [ 'urlId' ],
+            where: { url: { userId }},
+            _count: {id:true},
+            orderBy: { _count: {id:'desc'}},
             take: 1,
         });
 
@@ -116,7 +113,7 @@ async function getGlobalAnalytics(req,res){
         }
 
         return res.json({
-            totalLinks: userUrls.length,
+            totalLinks: totalLinks,
             totalClicks,
             globalReferrers: globalReferrers.map(r =>({
                 name: r.referrer || 'Direct',

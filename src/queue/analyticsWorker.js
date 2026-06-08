@@ -18,6 +18,10 @@ const worker = new Worker(
     {
         connection,
         concurrency: 10,
+        settings: {
+            maxStalledCount: 3,
+            stalledInterval: 30000,
+        }
     }
 );
 

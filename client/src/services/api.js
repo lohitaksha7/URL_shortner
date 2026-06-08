@@ -13,11 +13,15 @@ api.interceptors.request.use((config) => {
     return config;
 });
 
-// ✅ Handle 401 responses — clear token and redirect to login
+// ✅ Handle 401 responses — clear token and redirect to login, except for auth requests
 api.interceptors.response.use(
     (response) => response,
     (error) => {
-        if (error.response?.status === 401) {
+        const isAuthRoute = error.config?.url?.includes('/auth/login') || 
+                            error.config?.url?.includes('/auth/google') || 
+                            error.config?.url?.includes('/auth/register');
+
+        if (error.response?.status === 401 && !isAuthRoute) {
             localStorage.removeItem('token');
             window.location.href = '/login';
         }

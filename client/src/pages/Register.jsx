@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import { Mail, Lock, ArrowRight, Link2, Eye, EyeOff, Sparkles } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import Captcha from '../components/Captcha';
+import { GoogleLogin } from '@react-oauth/google';
 
 function Register() {
   const [email, setEmail] = useState('');
@@ -11,8 +12,21 @@ function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { register } = useAuth();
+  const { register, loginWithGoogle } = useAuth();
   const captchaRef = useRef(null);
+
+  async function handleGoogleSuccess(credentialResponse) {
+    setLoading(true);
+    try {
+      await loginWithGoogle(credentialResponse.credential);
+      toast.success('Welcome back!');
+      navigate('/dashboard');
+    } catch (error) {
+      toast.error(error?.response?.data?.error || 'Google Login failed.');
+    } finally {
+      setLoading(false);
+    }
+  }
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -339,6 +353,21 @@ function Register() {
               By signing up, you agree to our Terms of Service and Privacy Policy.
             </p>
           </form>
+
+          {/* Divider */}
+          <div style={{ display: 'flex', alignItems: 'center', margin: '20px 0', color: 'var(--text-muted)' }}>
+            <hr style={{ flex: 1, border: 'none', borderTop: '1px solid var(--border)' }} />
+            <span style={{ padding: '0 10px', fontSize: '14px' }}>or</span>
+            <hr style={{ flex: 1, border: 'none', borderTop: '1px solid var(--border)' }} />
+          </div>
+
+          {/* Google Button */}
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={() => toast.error('Google Sign-In failed')}
+            />
+          </div>
         </div>
       </div>
     </div>

@@ -38,6 +38,15 @@ export function AuthProvider({children}){
         setUser(response.data.user);
     }
 
+    async function loginWithGoogle(googleToken){
+        const response = await api.post(
+            '/auth/google',
+            { token: googleToken },
+        );
+        localStorage.setItem('token', response.data.token);
+        setUser(response.data.user);
+    }
+
     async function register(email, password, captchaToken) {
         await api.post(
             '/auth/register',
@@ -58,6 +67,7 @@ export function AuthProvider({children}){
             value = {{
                 user,
                 login,
+                loginWithGoogle,
                 register,
                 logout,
                 loading,

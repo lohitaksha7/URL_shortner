@@ -7,10 +7,12 @@ const verifyCaptcha = require('../middleware/captchaMiddleware');
 const{
     register,
     login,
+    googleAuth,
 } = require('./authController');
 
 router.post('/register', authLimiter, verifyCaptcha, register);
 router.post('/login', authLimiter, verifyCaptcha, login);
+router.post('/google', authLimiter, googleAuth);
 
 router.get(
     '/me',
