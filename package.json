@@ -5,9 +5,10 @@
   "main": "index.js",
   "scripts": {
     "postinstall": "prisma generate",
+    "build": "prisma generate",
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon src/server.js",
-    "start": "node src/server.js",
+    "start": "prisma generate && node src/server.js",
     "worker": "node src/queue/analyticsWorker.js"
   },
   "keywords": [],
