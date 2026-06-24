@@ -1,6 +1,5 @@
 const IORedis = require('ioredis');
 
-
 const connection = process.env.REDIS_URL
   ? new IORedis(process.env.REDIS_URL, { maxRetriesPerRequest: null })
   : new IORedis({
@@ -9,4 +8,13 @@ const connection = process.env.REDIS_URL
       maxRetriesPerRequest: null,
     });
 
+connection.on('connect', () => {
+  console.log('✓ Redis connection established');
+});
+
+connection.on('error', (err) => {
+  console.error('✗ Redis connection error:', err.message);
+});
+
 module.exports = connection;
+
